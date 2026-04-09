@@ -464,8 +464,12 @@ const evaluationQuestions: EvaluationQuestion[] = [
   }
 ];
 
-function normalizeResponse(value: string) {
-  return value.trim().toLowerCase().replace(",", ".").replace(/\s+/g, " ");
+function normalizeTextResponse(value: string) {
+  return value.trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+function normalizeNumberResponse(value: string) {
+  return normalizeTextResponse(value).replace(/,/g, ".").replace(/\s+/g, "");
 }
 
 function hasAnswer(response: AnswerValue | undefined) {
@@ -482,7 +486,7 @@ function isQuestionCorrect(question: EvaluationQuestion, response: AnswerValue) 
   }
 
   if (question.type === "number") {
-    const normalizedResponse = normalizeResponse(
+    const normalizedResponse = normalizeNumberResponse(
       typeof response === "string" ? response : response.join(" ")
     );
     const actual = Number(normalizedResponse);
@@ -492,7 +496,7 @@ function isQuestionCorrect(question: EvaluationQuestion, response: AnswerValue) 
     }
 
     return question.acceptedValues.some((value) => {
-      const expected = Number(normalizeResponse(value));
+      const expected = Number(normalizeNumberResponse(value));
       const tolerance = Number.isInteger(expected) ? 0.001 : 0.02;
 
       return Math.abs(actual - expected) <= tolerance;
@@ -500,11 +504,13 @@ function isQuestionCorrect(question: EvaluationQuestion, response: AnswerValue) 
   }
 
   const selectedValues = Array.isArray(response) ? response : [response];
-  const normalizedSelections = selectedValues.map((value) => normalizeResponse(value));
+  const normalizedSelections = selectedValues.map((value) =>
+    normalizeTextResponse(value)
+  );
 
   if (question.selectionMode === "multiple") {
     const expectedSelections = question.acceptedValues.map((value) =>
-      normalizeResponse(value)
+      normalizeTextResponse(value)
     );
 
     return (
@@ -514,7 +520,7 @@ function isQuestionCorrect(question: EvaluationQuestion, response: AnswerValue) 
   }
 
   return question.acceptedValues.some(
-    (value) => normalizedSelections[0] === normalizeResponse(value)
+    (value) => normalizedSelections[0] === normalizeTextResponse(value)
   );
 }
 

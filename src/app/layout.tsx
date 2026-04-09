@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Formulaire d'inscription guide",
+  title: "Inscription guidée pour tracker privé",
   description:
-    "Parcours ludique pour apprendre les bases du peer-to-peer et du ratio avant une inscription."
+    "Onboarding interactif avec rappel des règles, création de compte après validation."
 };
 
 export default function RootLayout({

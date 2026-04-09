@@ -37,3 +37,15 @@ droits ou qui sont libres de diffusion.
 - `npm run build` compile l'application pour la production.
 - `npm run start` lance l'application compilée.
 - `npm run lint` exécute ESLint.
+
+## Déploiement GitHub Pages
+
+Le projet est configuré pour un export statique compatible avec GitHub Pages.
+
+1. Pousse le repo sur GitHub.
+2. Vérifie que la branche principale est bien `main`.
+3. Dans GitHub, ouvre `Settings > Pages`.
+4. Dans `Build and deployment`, choisis `GitHub Actions`.
+5. Pousse sur `main` ou lance le workflow `Deploy GitHub Pages` manuellement.
+
+Le site sera publié automatiquement à l'URL GitHub Pages du repository.

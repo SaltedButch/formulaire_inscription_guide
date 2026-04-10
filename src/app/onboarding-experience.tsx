@@ -464,8 +464,12 @@ const evaluationQuestions: EvaluationQuestion[] = [
   }
 ];
 
-function normalizeResponse(value: string) {
-  return value.trim().toLowerCase().replace(",", ".").replace(/\s+/g, " ");
+function normalizeTextResponse(value: string) {
+  return value.trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+function normalizeNumberResponse(value: string) {
+  return normalizeTextResponse(value).replace(/,/g, ".").replace(/\s+/g, "");
 }
 
 function hasAnswer(response: AnswerValue | undefined) {
@@ -482,7 +486,7 @@ function isQuestionCorrect(question: EvaluationQuestion, response: AnswerValue) 
   }
 
   if (question.type === "number") {
-    const normalizedResponse = normalizeResponse(
+    const normalizedResponse = normalizeNumberResponse(
       typeof response === "string" ? response : response.join(" ")
     );
     const actual = Number(normalizedResponse);
@@ -492,7 +496,7 @@ function isQuestionCorrect(question: EvaluationQuestion, response: AnswerValue) 
     }
 
     return question.acceptedValues.some((value) => {
-      const expected = Number(normalizeResponse(value));
+      const expected = Number(normalizeNumberResponse(value));
       const tolerance = Number.isInteger(expected) ? 0.001 : 0.02;
 
       return Math.abs(actual - expected) <= tolerance;
@@ -500,11 +504,13 @@ function isQuestionCorrect(question: EvaluationQuestion, response: AnswerValue) 
   }
 
   const selectedValues = Array.isArray(response) ? response : [response];
-  const normalizedSelections = selectedValues.map((value) => normalizeResponse(value));
+  const normalizedSelections = selectedValues.map((value) =>
+    normalizeTextResponse(value)
+  );
 
   if (question.selectionMode === "multiple") {
     const expectedSelections = question.acceptedValues.map((value) =>
-      normalizeResponse(value)
+      normalizeTextResponse(value)
     );
 
     return (
@@ -514,7 +520,7 @@ function isQuestionCorrect(question: EvaluationQuestion, response: AnswerValue) 
   }
 
   return question.acceptedValues.some(
-    (value) => normalizedSelections[0] === normalizeResponse(value)
+    (value) => normalizedSelections[0] === normalizeTextResponse(value)
   );
 }
 
@@ -1220,141 +1226,7 @@ export function OnboardingExperience() {
         <>
           <section className="grid two-columns bottom-grid">
             <section className="panel account-panel" aria-labelledby="account-title">
-              <div className="section-heading">
-                <p className="eyebrow">Compte</p>
-                <h2 id="account-title">Informations du compte</h2>
-                <p>
-                  La validation est acquise. Il ne reste plus qu&apos;à renseigner
-                  les informations du compte.
-                </p>
-              </div>
-
-              <form
-                className="account-form"
-                onSubmit={(event) => event.preventDefault()}
-              >
-                <label>
-                  Pseudo
-                  <input
-                    name="username"
-                    onChange={(event) => {
-                      setUsername(event.target.value);
-                      setDemoCreated(false);
-                    }}
-                    placeholder="ex: SeedBuilder"
-                    type="text"
-                    value={username}
-                  />
-                </label>
-
-                <label>
-                  Email
-                  <input
-                    name="email"
-                    onChange={(event) => {
-                      setEmail(event.target.value);
-                      setDemoCreated(false);
-                    }}
-                    placeholder="nom@example.com"
-                    type="email"
-                    value={email}
-                  />
-                </label>
-
-                <label>
-                  Phrase de passe
-                  <input
-                    name="passphrase"
-                    onChange={(event) => {
-                      setPassphrase(event.target.value);
-                      setDemoCreated(false);
-                    }}
-                    placeholder="12 caractères minimum"
-                    type="password"
-                    value={passphrase}
-                  />
-                </label>
-
-                <div className="micro-checklist">
-                  <ChecklistItem
-                    ready={passphrase.length >= 12}
-                    text="12 caractères minimum"
-                  />
-                  <ChecklistItem
-                    ready={passphrase.includes(" ")}
-                    text="Une phrase de passe est bien utilisée"
-                  />
-                  <ChecklistItem
-                    ready={email.includes("@")}
-                    text="L'adresse e-mail semble valide"
-                  />
-                </div>
-
-                <label className="checkbox-row">
-                  <input
-                    checked={trackerAccepted}
-                    onChange={(event) => {
-                      setTrackerAccepted(event.target.checked);
-                      setDemoCreated(false);
-                    }}
-                    type="checkbox"
-                  />
-                  <span>
-                    Je confirme que mon passkey est personnel et que mon client
-                    respecte les règles du site.
-                  </span>
-                </label>
-
-                <label className="checkbox-row">
-                  <input
-                    checked={securityAccepted}
-                    onChange={(event) => {
-                      setSecurityAccepted(event.target.checked);
-                      setDemoCreated(false);
-                    }}
-                    type="checkbox"
-                  />
-                  <span>
-                    Je comprends qu'un mot de passe doit être stocké de façon
-                    hachée et jamais en clair.
-                  </span>
-                </label>
-
-                <StatusPill ready={isFormReady} text="Formulaire prêt" />
-              </form>
-            </section>
-
-            <section className="panel security-panel" aria-labelledby="security-title">
-              <div className="section-heading">
-                <p className="eyebrow">Bonnes pratiques</p>
-                <h2 id="security-title">Repères utiles</h2>
-              </div>
-
-              <div className="security-stack">
-                <article className="note-card">
-                  <h3>Avant de télécharger</h3>
-                  <p>
-                    Vérifie que le client est autorisé, que le port d&apos;écoute
-                    est correct et que tu pourras assurer le seed ensuite.
-                  </p>
-                </article>
-
-                <article className="note-card">
-                  <h3>Pendant le seed</h3>
-                  <p>
-                    Le ratio aide à mesurer le partage, mais le site regarde
-                    aussi le temps de seed, les H&amp;R et les comportements répétés.
-                  </p>
-                </article>
-
-                <article className="note-card">
-                  <h3>Pour les tokens</h3>
-                  <p>
-                    Les tokens récompensent le seed long terme et certaines
-                    actions utiles. Ils ne remplacent pas un bon comportement.
-                  </p>
-                </article>
-              </div>
+            <p>Place holder création de compte</p>
             </section>
           </section>
 
